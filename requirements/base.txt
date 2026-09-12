@@ -1,0 +1,22 @@
+# Every dependency pinned to an exact version deliberately -- an unpinned
+# install in a sibling project (mt5-trend-bot) once pulled a broken
+# bleeding-edge combo of interdependent packages. Same discipline here.
+pydantic==2.9.2
+pydantic-settings==2.6.1
+SQLAlchemy==2.0.36
+alembic==1.14.0
+structlog==24.4.0
+python-dotenv==1.0.1
+
+fastapi==0.115.6
+starlette==0.41.3
+uvicorn[standard]==0.32.1
+python-multipart==0.0.9
+python-jose[cryptography]==3.3.0
+# passlib's bcrypt backend detection breaks against bcrypt>=4.1 (missing
+# __about__.__version__) -- pinned below its normal auto-resolved latest
+# deliberately, same known trap avoided in the trading-bot project.
+passlib==1.7.4
+bcrypt==4.0.1
+pyotp==2.9.0
+httpx==0.27.2

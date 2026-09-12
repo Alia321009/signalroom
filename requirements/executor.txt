@@ -1,0 +1,10 @@
+# Installed on a MEMBER's own Windows machine, next to their logged-in MT5
+# terminal -- NOT on the server. Separate from base.txt/dev.txt because
+# MetaTrader5 is a Windows-only package and has no reason to be anywhere
+# near the multi-tenant API server itself.
+MetaTrader5==5.0.6147
+httpx==0.27.2
+pydantic==2.9.2
+pydantic-settings==2.6.1
+structlog==24.4.0
+python-dotenv==1.0.1

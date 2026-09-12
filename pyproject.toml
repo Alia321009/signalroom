@@ -1,0 +1,10 @@
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["app", "executor"]
+# The thin MT5 integration layer -- no fake terminal to test against, same
+# convention as the trading-bot project's own omission of
+# engine/adapters/mt5_adapter.py.
+omit = ["executor/mt5_client.py"]

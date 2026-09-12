@@ -1,0 +1,66 @@
+SignalRoom: trading-signal service platform (initial build)
+
+Built after analyzing growthclubpk.com -- a real gold-signal service
+(discretionary calls with entry/SL/multi-target-TP, an optional MT5
+auto-bot, funded by broker-referral commission or a flat monthly fee).
+This is a fresh, independent implementation of that product shape, not a
+clone of their code, brand, or content.
+
+Architecture:
+- app/ -- FastAPI backend, multi-tenant: members, subscriptions, calls,
+  bot settings. Member self-registration with optional TOTP (admin's is
+  mandatory); JWT access/refresh; rate-limited login. WebSocket push of
+  new/updated calls. A deliberately unauthenticated GET /calls/public
+  track record (closed calls only).
+- web/ -- React 18 + TypeScript + Vite dashboard: admin view (post/update
+  calls, manage member subscriptions), member view (live call feed, bot
+  settings, broker picker).
+- executor/ -- the local auto-bot. Runs on a MEMBER's own machine next to
+  their own already-logged-in MT5 terminal, authenticated via a dedicated
+  per-member API key (not the web JWT -- an unattended script can't do an
+  interactive 2FA/refresh dance). Polls for calls, sizes positions by the
+  member's own risk_pct and account balance, splits volume across up to
+  3 TP legs, closes positions when a call closes, reports fills back.
+
+Why the executor is separate and local, not centralized: MT5's Python
+package attaches to one already-running, already-logged-in terminal via
+IPC -- it can't manage many different members' broker logins from one
+server process. This mirrors how real signal-copier products actually
+work, and means the service never sees or stores a member's broker
+password.
+
+Two real bugs caught by tests, not shipped:
+- The WebSocket's "is this call new or updated" check compared
+  created_at == updated_at -- since SQLAlchemy stamps each column with a
+  separate timestamp call at flush time, these are never actually equal
+  even on a brand-new row. Fixed by tracking already-seen call ids on the
+  connection instead.
+- executor/sizing.py's volume-splitting could round a per-leg size UP to
+  exactly volume_min while still over-allocating across multiple legs
+  (e.g. 3 legs x volume_min > the total available), and the rounding-
+  remainder correction on the first leg then drove it to a computed 0.0 --
+  a zero-volume order a real broker would simply reject. Fixed by checking
+  total capacity against the raw total before rounding any per-leg size,
+  with a second guard if the remainder correction itself pushes a leg
+  under the minimum.
+
+Known V1 limitations, stated in the README rather than silently assumed:
+manual (admin-set) subscription tracking, no payment gateway yet; the
+executor uses market orders, not pending/limit orders at the call's own
+entry price; record_execution_report isn't idempotent against executor
+retries; no compliance/regulatory review for running a paid signal/
+auto-trading service.
+
+107 backend tests / 95% coverage (executor/mt5_client.py excluded --
+no fake MT5 terminal to test against, same convention as the sibling
+trading-bot project's own MT5 adapter). 43 frontend tests.
+
+Verified against a real running instance end-to-end: admin bootstrap +
+TOTP login, a member registering and logging in with no 2FA, the admin
+posting a real call, the member seeing it, picking a broker, enabling the
+bot and generating an API key, the executor's own endpoints correctly
+filtering by that member's symbol whitelist, the admin closing the call
+with an outcome, and that closed call appearing in the public track
+record.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
