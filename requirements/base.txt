@@ -7,6 +7,11 @@ SQLAlchemy==2.0.36
 alembic==1.14.0
 structlog==24.4.0
 python-dotenv==1.0.1
+# Postgres driver -- SQLite (the local-dev default) has no real concurrent-
+# writer story, which matters the moment there's more than one paying
+# member; point DATABASE_URL at postgresql+psycopg://... in production.
+psycopg[binary]==3.2.3
+gunicorn==23.0.0
 
 fastapi==0.115.6
 starlette==0.41.3

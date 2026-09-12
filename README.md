@@ -12,6 +12,10 @@ auto-bot + broker-referral/paid-subscription funding). This is a fresh,
 independent implementation of that product shape, not a clone of their
 code, brand, or content.
 
+**Deploying?** See [`DEPLOY.md`](DEPLOY.md) — needs a real Python host
+(a VPS, or a PaaS that builds a `Dockerfile`); shared PHP/cPanel hosting
+cannot run this backend.
+
 ## Architecture
 
 ```

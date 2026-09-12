@@ -1,0 +1,6 @@
+# docker-entrypoint.sh (and any future shell script) MUST stay LF -- a
+# CRLF shebang line ("#!/bin/sh\r") fails to exec inside the Linux
+# container with a cryptic "No such file or directory". This repo lives
+# on a Windows dev machine with Git likely set to autocrlf=true, which
+# would otherwise silently convert it to CRLF on a future checkout here.
+*.sh text eol=lf
